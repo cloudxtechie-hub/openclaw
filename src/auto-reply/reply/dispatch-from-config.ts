@@ -269,7 +269,7 @@ export async function dispatchReplyFromConfig(params: {
     // Track accumulated block text for TTS generation after streaming completes.
     // When block streaming succeeds, there's no final reply, so we need to generate
     // TTS audio separately from the accumulated block content.
-    let accumulatedBlockText = "";
+    const blockTextParts: string[] = [];
     let blockCount = 0;
 
     const replyResult = await (params.replyResolver ?? getReplyFromConfig)(
@@ -301,10 +301,7 @@ export async function dispatchReplyFromConfig(params: {
           const run = async () => {
             // Accumulate block text for TTS generation after streaming
             if (payload.text) {
-              if (accumulatedBlockText.length > 0) {
-                accumulatedBlockText += "\n";
-              }
-              accumulatedBlockText += payload.text;
+              blockTextParts.push(payload.text);
               blockCount++;
             }
             const ttsPayload = await maybeApplyTtsToPayload({
@@ -367,6 +364,7 @@ export async function dispatchReplyFromConfig(params: {
     // Generate TTS-only reply after block streaming completes (when there's no final reply).
     // This handles the case where block streaming succeeds and drops final payloads,
     // but we still want TTS audio to be generated from the accumulated block content.
+    const accumulatedBlockText = blockTextParts.join("\n");
     if (
       ttsMode === "final" &&
       replies.length === 0 &&

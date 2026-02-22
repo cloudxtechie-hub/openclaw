@@ -253,10 +253,14 @@ export function pruneContextMessages(params: {
   }
 
   let prunableToolChars = 0;
+  // Cache char estimates to avoid recomputing them in the hard-clear pass below.
+  const toolCharCache = new Map<number, number>();
   for (const i of prunableToolIndexes) {
     const msg = outputAfterSoftTrim[i];
     if (!msg || msg.role !== "toolResult") continue;
-    prunableToolChars += estimateMessageChars(msg);
+    const chars = estimateMessageChars(msg);
+    prunableToolChars += chars;
+    toolCharCache.set(i, chars);
   }
   if (prunableToolChars < settings.minPrunableToolChars) {
     return outputAfterSoftTrim;
@@ -267,7 +271,7 @@ export function pruneContextMessages(params: {
     const msg = (next ?? messages)[i];
     if (!msg || msg.role !== "toolResult") continue;
 
-    const beforeChars = estimateMessageChars(msg);
+    const beforeChars = toolCharCache.get(i) ?? estimateMessageChars(msg);
     const cleared: ToolResultMessage = {
       ...msg,
       content: [asText(settings.hardClear.placeholder)],

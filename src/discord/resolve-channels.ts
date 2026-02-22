@@ -168,11 +168,8 @@ export async function resolveDiscordChannelAllowlist(params: {
     const parsed = parseDiscordChannelInput(input);
     if (parsed.guildOnly) {
       const guild =
-        parsed.guildId && guilds.find((entry) => entry.id === parsed.guildId)
-          ? guilds.find((entry) => entry.id === parsed.guildId)
-          : parsed.guild
-            ? resolveGuildByName(guilds, parsed.guild)
-            : undefined;
+        (parsed.guildId ? guilds.find((entry) => entry.id === parsed.guildId) : undefined) ??
+        (parsed.guild ? resolveGuildByName(guilds, parsed.guild) : undefined);
       if (guild) {
         results.push({
           input,
@@ -216,11 +213,8 @@ export async function resolveDiscordChannelAllowlist(params: {
 
     if (parsed.guildId || parsed.guild) {
       const guild =
-        parsed.guildId && guilds.find((entry) => entry.id === parsed.guildId)
-          ? guilds.find((entry) => entry.id === parsed.guildId)
-          : parsed.guild
-            ? resolveGuildByName(guilds, parsed.guild)
-            : undefined;
+        (parsed.guildId ? guilds.find((entry) => entry.id === parsed.guildId) : undefined) ??
+        (parsed.guild ? resolveGuildByName(guilds, parsed.guild) : undefined);
       const channelQuery = parsed.channel?.trim();
       if (!guild || !channelQuery) {
         results.push({
