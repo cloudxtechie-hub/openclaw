@@ -227,6 +227,14 @@ const entries: SubCliEntry[] = [
       mod.registerUpdateCli(program);
     },
   },
+  {
+    name: "ansible",
+    description: "Ansible playbook runner",
+    register: async (program) => {
+      const mod = await import("../ansible-cli.js");
+      mod.registerAnsibleCli(program);
+    },
+  },
 ];
 
 function removeCommand(program: Command, command: Command) {
